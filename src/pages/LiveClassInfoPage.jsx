@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../Config/firebaseConfig';
 import { useAuth } from '../context/AuthContext';
-import { CheckCircleIcon, ClockIcon, ArrowLeftIcon, VideoCameraIcon } from '@heroicons/react/24/solid';
+// Added ChatBubbleLeftRightIcon for the demo button
+import { CheckCircleIcon, ClockIcon, ArrowLeftIcon, VideoCameraIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
 
 
 // --- HELPER FUNCTION: Converts URLs to clickable links ---
@@ -55,6 +56,19 @@ export default function LiveClassInfoPage() {
     fetchCourse();
   }, [courseId]);
 
+  // --- NEW FUNCTION: Handle WhatsApp Demo Request ---
+  const handleDemoRequest = () => {
+    const phoneNumber = "918982836220";
+    // Construct the message with the specific course title
+    const message = `Hello, I would like to request a demo for the live class: "${course.title}".`;
+    
+    // Create the WhatsApp API URL
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    
+    // Open in a new tab
+    window.open(whatsappUrl, '_blank');
+  };
+
   if (loading) {
      return <div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>;
   }
@@ -99,12 +113,23 @@ export default function LiveClassInfoPage() {
             <div className="bg-white rounded-2xl shadow-2xl p-6">
               <img src={course.imageUrl} alt={course.title} className="w-full h-48 object-cover rounded-xl mb-6"/>
               <span className="text-4xl font-extrabold text-gray-900">{course.price}</span>
+              
               <Link 
                 to={currentUser ? `/checkout/live/${course.id}` : '/login'}
                 className="w-full block text-center bg-indigo-600 text-white font-bold py-4 rounded-xl hover:bg-indigo-700 transition text-lg mt-6"
               >
                 Enroll Now
               </Link>
+
+              {/* --- NEW BUTTON: Request Demo --- */}
+              <button
+                onClick={handleDemoRequest}
+                className="w-full flex items-center justify-center border-2 border-indigo-600 text-indigo-600 font-bold py-3 rounded-xl hover:bg-indigo-50 transition text-lg mt-4"
+              >
+                <ChatBubbleLeftRightIcon className="w-6 h-6 mr-2" />
+                Request a Demo
+              </button>
+
               <div className="border-t mt-6 pt-6">
                 <p className="font-semibold text-gray-800 mb-3">This session includes:</p>
                 <div className="space-y-2">

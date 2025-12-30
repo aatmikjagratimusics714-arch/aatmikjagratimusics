@@ -27,7 +27,6 @@ import LiveClassInfoPage from "./pages/LiveClassInfoPage.jsx";
 import AdminLiveCourses from "./pages/AdminLiveCourses.jsx";
 import LiveCourseEditor from "./pages/LiveCourseEditor.jsx";
 import EnrolledLiveCoursePage from "./pages/EnrolledLiveCoursePage.jsx"; 
-import PolicyPage from "./pages/PolicyPage.jsx";
 
 export default function App() {
   const pathname = useLocation().pathname;
@@ -50,7 +49,6 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/courses" element={<Courses />} />
-        <Route path="/policies" element={<PolicyPage />} />
         
         {/* Public Info Pages */}
         <Route path="/course/:courseId" element={<CourseInfoPage />} />

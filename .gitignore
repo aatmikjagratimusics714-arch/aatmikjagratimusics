@@ -24,4 +24,3 @@ dist-ssr
 *.sw?
 
 functions/.env
-.env

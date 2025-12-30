@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../Config/firebaseConfig';
-import { Upload, Radio, BookOpen, ArrowLeft, Video, Calendar } from 'lucide-react';
+import { Upload, Radio, BookOpen, ArrowLeft, Video } from 'lucide-react';
 import { uploadToCloudinary } from '../services/cloudinaryService';
 
 // Simplified template for a new live course
@@ -14,8 +14,8 @@ const newLiveCourseTemplate = {
   price: "₹",
   validityDays: "",
   meetingLink: "",
-  liveDate: "", // Date and time when live session happens
-  recordedVideoUrl: "", // Video uploaded to Cloudinary
+  liveDate: "", 
+  recordedVideoUrl: "", 
   createdAt: serverTimestamp(),
 };
 
@@ -25,6 +25,8 @@ export default function LiveCourseEditor() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  
+  // Progress states
   const [imageUploadProgress, setImageUploadProgress] = useState(0);
   const [videoUploadProgress, setVideoUploadProgress] = useState(0);
 
@@ -79,20 +81,15 @@ export default function LiveCourseEditor() {
     const file = e.target.files[0];
     if (!file) return;
     
-    setImageUploadProgress(1);
-    const progressInterval = setInterval(() => {
-      setImageUploadProgress(prev => Math.min(prev + 10, 90));
-    }, 200);
-    
     try {
-      const imageUrl = await uploadToCloudinary(file);
-      clearInterval(progressInterval);
-      setImageUploadProgress(100);
-      setCourse(prev => ({ ...prev, imageUrl }));
+      // Pass the progress setter to the function
+      const imageUrl = await uploadToCloudinary(file, (progress) => {
+        setImageUploadProgress(progress);
+      });
       
-      setTimeout(() => setImageUploadProgress(0), 500);
+      setCourse(prev => ({ ...prev, imageUrl }));
+      setImageUploadProgress(0); // Reset after success
     } catch (error) {
-      clearInterval(progressInterval);
       setImageUploadProgress(0);
       alert('Image upload failed. Please try again.');
     }
@@ -107,22 +104,17 @@ export default function LiveCourseEditor() {
       return;
     }
     
-    setVideoUploadProgress(1);
-    const progressInterval = setInterval(() => {
-      setVideoUploadProgress(prev => Math.min(prev + 5, 90));
-    }, 500);
-    
     try {
-      const videoUrl = await uploadToCloudinary(file);
-      clearInterval(progressInterval);
-      setVideoUploadProgress(100);
-      setCourse(prev => ({ ...prev, recordedVideoUrl: videoUrl }));
+      // Pass the progress setter to the function
+      const videoUrl = await uploadToCloudinary(file, (progress) => {
+        setVideoUploadProgress(progress);
+      });
       
-      setTimeout(() => setVideoUploadProgress(0), 500);
+      setCourse(prev => ({ ...prev, recordedVideoUrl: videoUrl }));
+      setVideoUploadProgress(0); // Reset after success
     } catch (error) {
-      clearInterval(progressInterval);
       setVideoUploadProgress(0);
-      alert('Video upload failed. Please try again.');
+      // Error is already alerted in cloudinaryService for size issues
     }
   };
 
@@ -208,7 +200,7 @@ export default function LiveCourseEditor() {
                          <circle cx="32" cy="32" r="28" stroke="#4f46e5" strokeWidth="4" fill="none"
                            strokeDasharray={`${2 * Math.PI * 28}`}
                            strokeDashoffset={`${2 * Math.PI * 28 * (1 - imageUploadProgress / 100)}`}
-                           strokeLinecap="round" className="transition-all duration-n-300" />
+                           strokeLinecap="round" className="transition-all duration-300" />
                        </svg>
                        <div className="absolute inset-0 flex items-center justify-center">
                          <span className="text-sm font-bold text-indigo-600">{imageUploadProgress}%</span>
@@ -308,11 +300,11 @@ export default function LiveCourseEditor() {
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 relative flex-shrink-0">
                     <svg className="transform -rotate-90" width="100%" height="100%" viewBox="0 0 64 64">
-                      <circle cx="32" cy="32" r="28" stroke="#e5e7eb" strokeWidthth="4" fill="none" />
+                      <circle cx="32" cy="32" r="28" stroke="#e5e7eb" strokeWidth="4" fill="none" />
                      <circle cx="32" cy="32" r="28" stroke="#8b5cf6" strokeWidth="4" fill="none"
                         strokeDasharray={`${2 * Math.PI * 28}`}
                         strokeDashoffset={`${2 * Math.PI * 28 * (1 - videoUploadProgress / 100)}`}
-                        strokeLinecap="round" className="transition-all duration-n-300" />
+                        strokeLinecap="round" className="transition-all duration-300" />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-sm font-bold text-purple-600">{videoUploadProgress}%</span>
@@ -320,7 +312,7 @@ export default function LiveCourseEditor() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">Uploading video...</p>
-                    <p className="text-sm text-gray-600">This may take a few minutes depending on file size</p>
+                    <p className="text-sm text-gray-600">Please wait. Do not close this window.</p>
                   </div>
                 </div>
               </div>
@@ -332,7 +324,7 @@ export default function LiveCourseEditor() {
                   </div>
                   <p className="font-semibold text-gray-900 mb-1">Upload Recorded Video</p>
                   <p className="text-sm text-gray-600">MP4, MOV, or other video formats</p>
-                  <p className="text-xs text-gray-500 mt-1">Maximum file size: 500MB</p>
+                  <p className="text-xs text-gray-500 mt-1">Maximum file size: 100MB</p>
                 </div>
                 <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
               </label>

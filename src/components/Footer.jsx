@@ -23,39 +23,39 @@ export default function Footer() {
                         <p className="mt-4 text-sm leading-relaxed">
                             Master your musical instrument with expert-led courses. Learn at your own pace with professional lessons and resources.
                         </p>
-
+                        
                         {/* Social Links */}
                         <div className="flex gap-4 mt-6">
-                            <a
-                                href="https://www.instagram.com/aatmik_jagrati_musics/"
-                                target="_blank"
+                            <a 
+                                href="https://www.instagram.com/aatmik_jagrati_musics/" 
+                                target="_blank" 
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gradient-to-r hover:from-purple-500 hover:via-pink-500 hover:to-orange-500 flex items-center justify-center text-gray-600 hover:text-white transition-all duration-300"
                                 aria-label="Instagram"
                             >
                                 <Instagram size={18} />
                             </a>
-                            <a
-                                href="https://www.youtube.com/@AatmikJagratimusics"
-                                target="_blank"
+                            <a 
+                                href="https://www.youtube.com/@AatmikJagratimusics" 
+                                target="_blank" 
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-gray-100 hover:bg-red-600 flex items-center justify-center text-gray-600 hover:text-white transition-all duration-300"
                                 aria-label="YouTube"
                             >
                                 <Youtube size={18} />
                             </a>
-                            <a
-                                href="https://www.facebook.com/people/Aatmik-jagrati-musics/61573999355501/"
-                                target="_blank"
+                            <a 
+                                href="https://www.facebook.com/people/Aatmik-jagrati-musics/61573999355501/" 
+                                target="_blank" 
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-gray-100 hover:bg-blue-600 flex items-center justify-center text-gray-600 hover:text-white transition-all duration-300"
                                 aria-label="Facebook"
                             >
                                 <Facebook size={18} />
                             </a>
-                            <a
-                                href="https://wa.me/918982836220"
-                                target="_blank"
+                            <a 
+                                href="https://wa.me/918982836220" 
+                                target="_blank" 
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-gray-100 hover:bg-green-600 flex items-center justify-center text-gray-600 hover:text-white transition-all duration-300"
                                 aria-label="WhatsApp"
@@ -75,9 +75,6 @@ export default function Footer() {
                             <li><Link to="/my-courses" className="hover:text-indigo-600 transition">My Learning</Link></li>
                             <li><Link to="/login" className="hover:text-indigo-600 transition">Student Login</Link></li>
                             <li><Link to="/admin" className="hover:text-indigo-600 transition">Admin Panel</Link></li>
-                            <li><Link to="/policies" className="text-gray-400 hover:text-white transition">
-                                Privacy & Terms
-                            </Link></li>
                         </ul>
                     </div>
 

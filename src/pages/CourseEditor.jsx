@@ -15,7 +15,7 @@ const newCourseTemplate = {
   originalPrice: "",
   courseDuration: "",
   accessDuration: "",
-  validityDays: "", // <-- NEW: Added validity in days
+  validityDays: "",
   levels: [],
   createdAt: serverTimestamp(),
 };
@@ -26,9 +26,12 @@ export default function CourseEditor() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  
+  // Progress states
   const [imageUploadProgress, setImageUploadProgress] = useState(0);
   const [videoUploadProgress, setVideoUploadProgress] = useState({});
   const [notesImageUploadProgress, setNotesImageUploadProgress] = useState({});
+  
   const [expandedLevels, setExpandedLevels] = useState({});
   const [expandedChapters, setExpandedChapters] = useState({});
 
@@ -94,30 +97,16 @@ export default function CourseEditor() {
     const file = e.target.files[0];
     if (!file) return;
     
-    setImageUploadProgress(1);
-    
-    const progressInterval = setInterval(() => {
-      setImageUploadProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(progressInterval);
-          return 90;
-        }
-        return prev + 10;
-      });
-    }, 200);
-    
     try {
-      const imageUrl = await uploadToCloudinary(file);
-      setImageUploadProgress(100);
+      const imageUrl = await uploadToCloudinary(file, (progress) => {
+        setImageUploadProgress(progress);
+      });
       setCourse(prev => ({ ...prev, imageUrl }));
-      
-      setTimeout(() => {
-        setImageUploadProgress(0);
-      }, 500);
-    } catch (error) {
-      clearInterval(progressInterval);
       setImageUploadProgress(0);
-      alert('Image upload failed. Please try again.');
+    } catch (error) {
+      setImageUploadProgress(0);
+      // alert handled in service if size issue, otherwise here
+      if (!error.message.includes("File too large")) alert('Image upload failed.');
     }
   };
 
@@ -125,42 +114,26 @@ export default function CourseEditor() {
     const file = e.target.files[0];
     if (!file) return;
     
-    setVideoUploadProgress(prev => ({ ...prev, [topicId]: 1 }));
-    
-    const progressInterval = setInterval(() => {
-      setVideoUploadProgress(prev => {
-        const current = prev[topicId] || 0;
-        if (current >= 90) {
-          clearInterval(progressInterval);
-          return { ...prev, [topicId]: 90 };
-        }
-        return { ...prev, [topicId]: current + 8 };
-      });
-    }, 300);
-    
     try {
-      const videoUrl = await uploadToCloudinary(file);
-      clearInterval(progressInterval);
-      setVideoUploadProgress(prev => ({ ...prev, [topicId]: 100 }));
+      const videoUrl = await uploadToCloudinary(file, (progress) => {
+        setVideoUploadProgress(prev => ({ ...prev, [topicId]: progress }));
+      });
       
       const syntheticEvent = { target: { name: 'videoUrl', value: videoUrl } };
       handleTopicChange(levelIndex, chapterIndex, topicIndex, syntheticEvent);
       
-      setTimeout(() => {
-        setVideoUploadProgress(prev => {
-          const newProgress = { ...prev };
-          delete newProgress[topicId];
-          return newProgress;
-        });
-      }, 500);
-    } catch (error) {
-      clearInterval(progressInterval);
       setVideoUploadProgress(prev => {
         const newProgress = { ...prev };
         delete newProgress[topicId];
         return newProgress;
       });
-      alert('Video upload failed. Please try again.');
+    } catch (error) {
+      setVideoUploadProgress(prev => {
+        const newProgress = { ...prev };
+        delete newProgress[topicId];
+        return newProgress;
+      });
+      if (!error.message.includes("File too large")) alert('Video upload failed.');
     }
   };
 
@@ -168,42 +141,26 @@ export default function CourseEditor() {
     const file = e.target.files[0];
     if (!file) return;
 
-    setNotesImageUploadProgress(prev => ({ ...prev, [topicId]: 1 }));
-
-    const progressInterval = setInterval(() => {
-      setNotesImageUploadProgress(prev => {
-        const current = prev[topicId] || 0;
-        if (current >= 90) {
-          clearInterval(progressInterval);
-          return { ...prev, [topicId]: 90 };
-        }
-        return { ...prev, [topicId]: current + 10 };
-      });
-    }, 200);
-
     try {
-      const imageUrl = await uploadToCloudinary(file);
-      clearInterval(progressInterval);
-      setNotesImageUploadProgress(prev => ({ ...prev, [topicId]: 100 }));
+      const imageUrl = await uploadToCloudinary(file, (progress) => {
+         setNotesImageUploadProgress(prev => ({ ...prev, [topicId]: progress }));
+      });
 
       const syntheticEvent = { target: { name: 'notesImageUrl', value: imageUrl } };
       handleTopicChange(levelIndex, chapterIndex, topicIndex, syntheticEvent);
 
-      setTimeout(() => {
-        setNotesImageUploadProgress(prev => {
-          const newProgress = { ...prev };
-          delete newProgress[topicId];
-          return newProgress;
-        });
-      }, 500);
-    } catch (error) {
-      clearInterval(progressInterval);
       setNotesImageUploadProgress(prev => {
         const newProgress = { ...prev };
         delete newProgress[topicId];
         return newProgress;
       });
-      alert('Notes image upload failed. Please try again.');
+    } catch (error) {
+      setNotesImageUploadProgress(prev => {
+        const newProgress = { ...prev };
+        delete newProgress[topicId];
+        return newProgress;
+      });
+      if (!error.message.includes("File too large")) alert('Notes upload failed.');
     }
   };
   
@@ -212,7 +169,7 @@ export default function CourseEditor() {
     handleTopicChange(levelIndex, chapterIndex, topicIndex, syntheticEvent);
   };
 
-
+  // ... (Rest of the helper functions: handleCourseChange, handleLevelChange, etc. remain exactly the same) ...
   const handleCourseChange = (e) => {
     setCourse(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -514,7 +471,7 @@ export default function CourseEditor() {
                   <p className="text-xs text-gray-500 mt-1">e.g., 30 hours, 6 weeks</p>
                 </div>
                 
-                {/* --- NEW FIELD --- */}
+                {/* Validity Field */}
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
                     Course Validity (days)
@@ -534,7 +491,7 @@ export default function CourseEditor() {
           </div>
         </div>
 
-        {/* Course Content Section */}
+        {/* Course Content Section - UI remains mostly same but uses new uploaders */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -806,7 +763,7 @@ export default function CourseEditor() {
                                                 <Video className="text-gray-400 flex-shrink-0" size={18} />
                                                 <div>
                                                   <p className="text-xs sm:text-sm font-medium text-gray-700">Upload lesson video</p>
-                                                  <p className="text-xs text-gray-500">MP4, MOV up to 500MB</p>
+                                                  <p className="text-xs text-gray-500">MP4, MOV up to 100MB</p>
                                                 </div>
                                                 <input
                                                   type="file"
