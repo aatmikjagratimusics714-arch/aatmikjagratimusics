@@ -97,7 +97,7 @@ function LiveClassCard({ course, enrolledCourses = [] }) {
           </div>
         )}
 
-        {/* FIX 5: Conditional Price Display */}
+        {/* FIX 5: Conditional Price Display with Original Price */}
         <div className="flex items-center gap-3 mt-auto pt-3 border-t border-gray-100 min-h-[50px]">
           {isEnrolled ? (
              <span className="text-green-600 font-bold text-lg flex items-center gap-2">
@@ -105,9 +105,17 @@ function LiveClassCard({ course, enrolledCourses = [] }) {
                Purchased
              </span>
           ) : (
-            <span className="text-2xl font-bold text-gray-900">
-              {course.price}
-            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-gray-900">
+                {course.price}
+              </span>
+              {/* Show Original Price if it exists */}
+              {course.originalPrice && (
+                <span className="text-sm text-gray-500 line-through decoration-gray-400">
+                  {course.originalPrice}
+                </span>
+              )}
+            </div>
           )}
         </div>
       </div>

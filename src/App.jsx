@@ -6,7 +6,7 @@ import Footer from "./components/Footer.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
 import AdminLayout from "./components/AdminLayout.jsx";
-import ScrollToTop from "./components/ScrollToTop.jsx"; // <--- 1. IMPORT THIS
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 // --- PAGE IMPORTS ---
 import Home from "./pages/Home.jsx";
@@ -20,6 +20,7 @@ import AdminCourses from "./pages/AdminCourses.jsx";
 import CourseEditor from "./pages/CourseEditor.jsx";
 import CourseInfoPage from "./pages/CourseInfoPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
+import AdminUsers from "./pages/AdminUsers.jsx"; // <--- ADDED IMPORT
 
 // --- LIVE COURSE IMPORTS ---
 import LiveClasses from "./pages/LiveClasses.jsx";
@@ -38,7 +39,6 @@ export default function App() {
 
   return (
     <>
-      {/* 2. ADD COMPONENT HERE */}
       <ScrollToTop />
 
       {/* Only render Navbar if showLayout is true */}
@@ -70,6 +70,9 @@ export default function App() {
         {/* --- ADMIN ROUTES --- */}
         <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
           <Route index element={<AdminDashboard />} />
+          
+          {/* New User Management Route */}
+          <Route path="users" element={<AdminUsers />} /> 
           
           {/* Standard Courses Admin */}
           <Route path="courses" element={<AdminCourses />} />

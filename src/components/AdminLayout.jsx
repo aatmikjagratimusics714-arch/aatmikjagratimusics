@@ -8,7 +8,9 @@ import {
   X,
   ChevronRight,
   ExternalLink,
-  Radio, // <-- Icon for Live Courses
+  Radio,
+  Users,           // <--- Imported Users icon
+  LayoutDashboard  // <--- Imported Dashboard icon
 } from 'lucide-react'
 
 export default function AdminLayout() {
@@ -28,16 +30,28 @@ export default function AdminLayout() {
     'flex items-center gap-3 rounded-xl px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-200 transition-all group relative'
 
   const navigationItems = [
+    // --- 1. Main Dashboard Link (Stats Page) ---
+    { 
+        to: '/admin', 
+        label: 'Dashboard', 
+        icon: LayoutDashboard, 
+        end: true // Ensures this only lights up when exactly on /admin
+    },
+    // --- 2. New User Management Link ---
+    { 
+        to: '/admin/users', 
+        label: 'User Management', 
+        icon: Users 
+    },
+    // --- Existing Links ---
     { to: '/admin/courses', label: 'Courses', icon: BookCopy },
     { to: '/admin/create-course', label: 'Create Course', icon: PlusCircle },
-    // --- New Links for Live Courses ---
     { to: '/admin/live-courses', label: 'Live Courses', icon: Radio },
     {
       to: '/admin/create-live-course',
       label: 'Create Live Course',
       icon: PlusCircle,
     },
-    // --- End of New Links ---
     { to: '/courses', label: 'Back to Site', icon: ExternalLink },
   ]
 
@@ -46,7 +60,8 @@ export default function AdminLayout() {
       {/* --- Mobile Header --- */}
       <div className="lg:hidden bg-white border-b shadow-sm sticky top-0 z-30">
         <div className="flex items-center justify-between px-4 py-3">
-          <Link to="/admin/courses" className="flex items-center gap-2">
+          {/* Linked Title to Main Dashboard */}
+          <Link to="/admin" className="flex items-center gap-2">
             <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               Admin Board
             </span>
@@ -96,9 +111,10 @@ export default function AdminLayout() {
               </button>
             </div>
 
-            {/* --- NEW: Header for the desktop sidebar --- */}
+            {/* --- Header for the desktop sidebar --- */}
             <div className="hidden lg:flex items-center justify-center px-4 py-5 border-b">
-              <Link to="/admin/courses">
+              {/* Linked Title to Main Dashboard */}
+              <Link to="/admin">
                 <span className="font-bold text-2xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                   Admin Board
                 </span>
@@ -112,7 +128,7 @@ export default function AdminLayout() {
                   <NavLink
                     key={item.to}
                     to={item.to}
-                    end={item.end}
+                    end={item.end} // Important for the main Dashboard link
                     onClick={closeMobileMenu}
                     className={({ isActive }) =>
                       isActive ? activeLinkClasses : linkClasses

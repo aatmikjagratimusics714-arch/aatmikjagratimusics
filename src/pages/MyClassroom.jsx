@@ -42,9 +42,11 @@ export default function MyClassroom() {
                     const userData = userDocSnap.data();
 
                     // --- 1. Fetch Regular Courses ---
+                    // Allow courses with NO expiry date (Lifetime) OR future expiry date
                     const enrolledCoursesInfo = (userData.enrolledCourses || []).filter(
-                        c => c.expiryDate && c.expiryDate.toDate() > new Date()
+                        c => !c.expiryDate || c.expiryDate.toDate() > new Date()
                     );
+                    
                     if (enrolledCoursesInfo.length > 0) {
                         const courseIds = enrolledCoursesInfo.map(c => c.courseId);
                         const coursesRef = collection(db, 'courses');
@@ -59,9 +61,11 @@ export default function MyClassroom() {
                     }
 
                     // --- 2. Fetch Live Courses ---
+                    // Allow courses with NO expiry date (Lifetime) OR future expiry date
                     const enrolledLiveCoursesInfo = (userData.enrolledLiveCourses || []).filter(
-                        c => c.expiryDate && c.expiryDate.toDate() > new Date()
+                        c => !c.expiryDate || c.expiryDate.toDate() > new Date()
                     );
+
                     if (enrolledLiveCoursesInfo.length > 0) {
                         const liveCourseIds = enrolledLiveCoursesInfo.map(c => c.courseId);
                         const liveCoursesRef = collection(db, 'liveCourses');
@@ -86,24 +90,18 @@ export default function MyClassroom() {
 
     // Timer for countdown - runs every second
     useEffect(() => {
-        // Only start timer if we have courses
         if (myCourses.length === 0 && myLiveCourses.length === 0) {
             return;
         }
 
         const timer = setInterval(() => {
             const newTimeLeft = {};
-            let hasExpired = false;
             
             // Calculate time for regular courses
             myCourses.forEach(course => {
                 if (course.expiryDate) {
                     const remaining = calculateTimeLeft(course.expiryDate.toDate());
                     newTimeLeft[`course-${course.id}`] = remaining;
-                    
-                    if (Object.keys(remaining).length === 0) {
-                        hasExpired = true;
-                    }
                 }
             });
 
@@ -112,35 +110,18 @@ export default function MyClassroom() {
                 if (course.expiryDate) {
                     const remaining = calculateTimeLeft(course.expiryDate.toDate());
                     newTimeLeft[`live-${course.id}`] = remaining;
-                    
-                    if (Object.keys(remaining).length === 0) {
-                        hasExpired = true;
-                    }
                 }
             });
             
             setTimeLeft(newTimeLeft);
-            
-            // Refresh page if any course has expired
-            if (hasExpired) {
-                window.location.reload();
-            }
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [myCourses.length, myLiveCourses.length]); // Only re-run when length changes
+    }, [myCourses.length, myLiveCourses.length]);
 
     const formatTimeDisplay = (timer) => {
-        if (!timer || Object.keys(timer).length === 0) {
-            return null;
-        }
-
-        // If days >= 1, show only days
-        if (timer.days >= 1) {
-            return `${timer.days} ${timer.days === 1 ? 'day' : 'days'} left`;
-        }
-        
-        // If less than 1 day, show hours, minutes, and seconds
+        if (!timer || Object.keys(timer).length === 0) return null;
+        if (timer.days >= 1) return `${timer.days} ${timer.days === 1 ? 'day' : 'days'} left`;
         return `${timer.hours}h ${timer.minutes}m ${timer.seconds}s left`;
     };
 
@@ -167,6 +148,8 @@ export default function MyClassroom() {
                                 const timer = timeLeft[`course-${course.id}`];
                                 const isExpiringSoon = timer && timer.days < 1;
                                 const timeDisplay = formatTimeDisplay(timer);
+                                // Treat Lifetime (null date) OR > 10,000 days as lifetime
+                                const isLifetime = !course.expiryDate || (timer && timer.days > 10000);
 
                                 return (
                                     <div key={course.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
@@ -176,15 +159,16 @@ export default function MyClassroom() {
                                         <div className="p-6 flex-grow flex flex-col">
                                             <h3 className="text-xl font-bold text-gray-900 mb-2">{course.title}</h3>
                                             
-                                            {/* Validity Timer */}
-                                            {timeDisplay && (
+                                            {/* Validity Timer - Only show if NOT lifetime */}
+                                            {!isLifetime && timeDisplay && (
                                                 <div className={`mt-2 mb-4 p-2 rounded-md text-sm font-semibold flex items-center justify-center ${isExpiringSoon ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
                                                     <Clock className="w-4 h-4 mr-2" />
                                                     <span>{timeDisplay}</span>
                                                 </div>
                                             )}
 
-                                            {!course.expiryDate && (
+                                            {/* Lifetime Badge */}
+                                            {isLifetime && (
                                                 <div className="mt-2 mb-4 p-2 rounded-md text-sm font-semibold flex items-center justify-center bg-blue-100 text-blue-800">
                                                     <Clock className="w-4 h-4 mr-2" />
                                                     <span>Lifetime Access</span>
@@ -217,6 +201,8 @@ export default function MyClassroom() {
                                 const timer = timeLeft[`live-${course.id}`];
                                 const isExpiringSoon = timer && timer.days < 1;
                                 const timeDisplay = formatTimeDisplay(timer);
+                                // Treat Lifetime (null date) OR > 10,000 days as lifetime
+                                const isLifetime = !course.expiryDate || (timer && timer.days > 10000);
 
                                 return (
                                     <div key={course.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
@@ -226,15 +212,16 @@ export default function MyClassroom() {
                                         <div className="p-6 flex-grow flex flex-col">
                                             <h3 className="text-xl font-bold text-gray-900 mb-2">{course.title}</h3>
                                             
-                                            {/* Validity Timer */}
-                                            {timeDisplay && (
+                                            {/* Validity Timer - Only show if NOT lifetime */}
+                                            {!isLifetime && timeDisplay && (
                                                 <div className={`mt-2 mb-4 p-2 rounded-md text-sm font-semibold flex items-center justify-center ${isExpiringSoon ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
                                                     <Clock className="w-4 h-4 mr-2" />
                                                     <span>{timeDisplay}</span>
                                                 </div>
                                             )}
 
-                                            {!course.expiryDate && (
+                                            {/* Lifetime Badge */}
+                                            {isLifetime && (
                                                 <div className="mt-2 mb-4 p-2 rounded-md text-sm font-semibold flex items-center justify-center bg-blue-100 text-blue-800">
                                                     <Clock className="w-4 h-4 mr-2" />
                                                     <span>Lifetime Access</span>

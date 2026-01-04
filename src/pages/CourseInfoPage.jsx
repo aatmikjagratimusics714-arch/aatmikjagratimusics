@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../Config/firebaseConfig';
 import { useAuth } from '../context/AuthContext';
+// Added ChatBubbleLeftRightIcon
 import { 
   LockClosedIcon, 
   CheckCircleIcon, 
@@ -11,7 +12,8 @@ import {
   ClockIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  ChatBubbleLeftRightIcon 
 } from '@heroicons/react/24/solid';
 
 export default function CourseInfoPage() {
@@ -43,6 +45,14 @@ export default function CourseInfoPage() {
 
     fetchCourse();
   }, [courseId]);
+
+  // --- NEW FUNCTION: Handle WhatsApp Demo Request ---
+  const handleDemoRequest = () => {
+    const phoneNumber = "918982836220";
+    const message = `Hello, I would like to request a demo for the course: "${course.title}".`;
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   const toggleLevel = (levelId) => {
     setExpandedLevels(prev => ({ ...prev, [levelId]: !prev[levelId] }));
@@ -152,13 +162,22 @@ export default function CourseInfoPage() {
                     )}
                   </div>
                 </div>
-                {/* --- FIX: Added '/course/' to the link --- */}
+                
                 <Link 
                   to={currentUser ? `/checkout/course/${course.id}` : '/login'} 
-                  className="w-full block text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3 sm:py-4 rounded-lg sm:rounded-xl hover:shadow-lg hover:scale-[1.02] transition text-base sm:text-lg mb-4 sm:mb-6"
+                  className="w-full block text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3 sm:py-4 rounded-lg sm:rounded-xl hover:shadow-lg hover:scale-[1.02] transition text-base sm:text-lg mb-4"
                 >
                   Enroll Now
                 </Link>
+
+                {/* --- NEW BUTTON (Mobile): Request Demo --- */}
+                <button
+                  onClick={handleDemoRequest}
+                  className="w-full flex items-center justify-center border-2 border-indigo-600 text-indigo-600 font-bold py-3 sm:py-4 rounded-lg sm:rounded-xl hover:bg-indigo-50 transition text-base sm:text-lg mb-6"
+                >
+                  <ChatBubbleLeftRightIcon className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                  Request a Demo
+                </button>
 
                 <div className="border-t border-gray-200 pt-4 sm:pt-6">
                   <p className="font-semibold text-gray-800 text-sm mb-3">This course includes:</p>
@@ -295,13 +314,21 @@ export default function CourseInfoPage() {
                     </div>
                   </div>
                   
-                  {/* --- FIX: Added '/course/' to the link --- */}
                   <Link 
                     to={currentUser ? `/checkout/course/${course.id}` : '/login'} 
-                    className="w-full block text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-xl hover:shadow-lg hover:scale-[1.02] transition text-lg mb-6"
+                    className="w-full block text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-xl hover:shadow-lg hover:scale-[1.02] transition text-lg mb-4"
                   >
                     {currentUser ? 'Enroll Now' : 'Sign In to Enroll'}
                   </Link>
+
+                   {/* --- NEW BUTTON (Desktop): Request Demo --- */}
+                  <button
+                    onClick={handleDemoRequest}
+                    className="w-full flex items-center justify-center border-2 border-indigo-600 text-indigo-600 font-bold py-3 rounded-xl hover:bg-indigo-50 transition text-lg mb-6"
+                  >
+                    <ChatBubbleLeftRightIcon className="w-6 h-6 mr-2" />
+                    Request a Demo
+                  </button>
 
                   <div className="space-y-3 border-t border-gray-100 pt-6">
                     <p className="font-semibold text-gray-800 text-sm">This course includes:</p>

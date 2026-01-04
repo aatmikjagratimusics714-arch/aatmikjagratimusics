@@ -12,6 +12,7 @@ const newLiveCourseTemplate = {
   imageUrl: "",
   instructor: "",
   price: "₹",
+  originalPrice: "", // <--- Added Original Price field
   validityDays: "",
   meetingLink: "",
   liveDate: "", 
@@ -231,16 +232,31 @@ export default function LiveCourseEditor() {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
                 <textarea name="description" value={course.description || ''} onChange={handleCourseChange} placeholder="Details about the live session" rows="4" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg resize-none"></textarea>
               </div>
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                  <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Instructor *</label>
                     <input type="text" name="instructor" value={course.instructor} onChange={handleCourseChange} placeholder="Instructor's Name" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg"/>
                  </div>
                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price *</label>
-                    <input type="text" name="price" value={course.price} onChange={handleCourseChange} placeholder="e.g., ₹499" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg"/>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Recording Access Validity (days) *</label>
+                    <input type="number" name="validityDays" value={course.validityDays || ''} onChange={handleCourseChange} placeholder="e.g., 30" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg"/>
                  </div>
               </div>
+
+              {/* Price and Original Price */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                 <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price (Selling Price) *</label>
+                    <input type="text" name="price" value={course.price} onChange={handleCourseChange} placeholder="e.g., ₹499" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg"/>
+                 </div>
+                 <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Original Price (Optional)</label>
+                    <input type="text" name="originalPrice" value={course.originalPrice || ''} onChange={handleCourseChange} placeholder="e.g., ₹999" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg"/>
+                    <p className="text-xs text-gray-500 mt-1">Shows a discount (e.g., <span className="line-through">₹999</span>)</p>
+                 </div>
+              </div>
+
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                  <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Meeting Link *</label>
@@ -256,10 +272,6 @@ export default function LiveCourseEditor() {
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg"
                     />
                  </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Recording Access Validity (days) *</label>
-                <input type="number" name="validityDays" value={course.validityDays || ''} onChange={handleCourseChange} placeholder="e.g., 30" className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg"/>
               </div>
             </div>
           </div>

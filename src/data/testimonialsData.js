@@ -25,5 +25,11 @@ export const testimonialsData = [
         handle: 'Team member',
         feedback: 'Percussion and rhythm specialist. Brings energy and creativity to every lesson, making learning fun and engaging.'
     },
+    {
+        image: '/assets/abhishekdewale.jpg',
+        name: 'Abhishek Dewale',
+        handle: 'Keyboard Instructor | Founder, Aatmik Jagrati Musics',
+        feedback: 'Percussion and rhythm specialist. Brings energy and creativity to every lesson, making learning fun and engaging.'
+    },
    
 ];
