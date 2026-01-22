@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile, sendPasswordResetEmail } from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../Config/firebaseConfig';
+// REMOVED: Firebase Storage imports
+// ADDED: Cloudinary Service import
+import { uploadToCloudinary } from '../services/cloudinaryService'; 
 import { User, Mail, Edit3, Key, Shield, Camera, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 
 export default function Profile() {
     const { currentUser, userRole } = useAuth();
@@ -17,14 +17,11 @@ export default function Profile() {
     const [photoURL, setPhotoURL] = useState(currentUser.photoURL || '');
     const fileInputRef = useRef(null);
 
-
     // Check if user is admin based on Firestore role
     const isAdmin = userRole === 'admin';
 
-
     const handleProfileUpdate = async () => {
         if (currentUser.displayName === displayName) return;
-
 
         setLoading(true);
         setError('');
@@ -39,7 +36,6 @@ export default function Profile() {
         setLoading(false);
     };
 
-
     const handlePasswordReset = async () => {
         setError('');
         setMessage('');
@@ -52,11 +48,9 @@ export default function Profile() {
         }
     };
 
-
     const handleImageUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
 
         // Validate file type
         if (!file.type.startsWith('image/')) {
@@ -64,54 +58,45 @@ export default function Profile() {
             return;
         }
 
-
         // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
             setError('Image size should be less than 5MB.');
             return;
         }
 
-
         setUploadingImage(true);
         setError('');
         setMessage('');
 
-
         try {
-            // Create a reference to the storage location
-            const imageRef = ref(storage, `profile-pictures/${currentUser.uid}/${file.name}`);
+            // --- SWITCHED TO CLOUDINARY ---
+            // 1. Upload to Cloudinary using your service
+            const newPhotoURL = await uploadToCloudinary(file);
             
-            // Upload the file
-            await uploadBytes(imageRef, file);
+            // 2. Update Firebase User Profile with the Cloudinary URL
+            await updateProfile(currentUser, { photoURL: newPhotoURL });
             
-            // Get the download URL
-            const downloadURL = await getDownloadURL(imageRef);
-            
-            // Update user profile with new photo URL
-            await updateProfile(currentUser, { photoURL: downloadURL });
-            
-            setPhotoURL(downloadURL);
+            // 3. Update local state
+            setPhotoURL(newPhotoURL);
             setMessage('Profile picture updated successfully!');
         } catch (err) {
-            setError('Failed to upload image. Please try again.');
-            console.error(err);
+            console.error("Upload Error:", err);
+            setError('Failed to upload image to Cloudinary. Please try again.');
         }
         
         setUploadingImage(false);
     };
 
-
     const handleRemoveImage = async () => {
         if (!photoURL) return;
-
 
         setUploadingImage(true);
         setError('');
         setMessage('');
 
-
         try {
             // Update profile to remove photo URL by setting it to empty string
+            // (Note: This unlinks the image from the user, but doesn't delete it from Cloudinary)
             await updateProfile(currentUser, { photoURL: '' });
             setPhotoURL('');
             setMessage('Profile picture removed successfully!');
@@ -120,16 +105,13 @@ export default function Profile() {
             console.error(err);
         }
 
-
         setUploadingImage(false);
     };
-
 
     return (
         <div className="min-h-screen bg-gray-50 pt-32 pb-16">
             <div className="max-w-3xl mx-auto px-4">
                 <h1 className="text-3xl font-bold text-gray-900 mb-8">Profile</h1>
-
 
                 {message && (
                     <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
@@ -141,7 +123,6 @@ export default function Profile() {
                         {error}
                     </div>
                 )}
-
 
                 {/* Admin Dashboard Button */}
                 {isAdmin && (
@@ -167,7 +148,6 @@ export default function Profile() {
                     </div>
                 )}
 
-
                 {/* Profile Picture Section */}
                 <div className="bg-white rounded-lg shadow p-6 mb-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h2>
@@ -180,6 +160,10 @@ export default function Profile() {
                                         src={photoURL} 
                                         alt="Profile" 
                                         className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none'; // Hide broken image
+                                            setPhotoURL(''); // Reset if URL is bad
+                                        }}
                                     />
                                 ) : (
                                     <User className="w-16 h-16 text-gray-400" />
@@ -196,7 +180,6 @@ export default function Profile() {
                             </button>
                         </div>
 
-
                         {/* Hidden File Input */}
                         <input
                             ref={fileInputRef}
@@ -205,7 +188,6 @@ export default function Profile() {
                             onChange={handleImageUpload}
                             className="hidden"
                         />
-
 
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row gap-3">
@@ -229,7 +211,6 @@ export default function Profile() {
                         </div>
                     </div>
                 </div>
-
 
                 <div className="bg-white rounded-lg shadow p-6 mb-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h2>
@@ -260,7 +241,6 @@ export default function Profile() {
                     </div>
                 </div>
 
-
                 <div className="bg-white rounded-lg shadow p-6 mb-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <Edit3 className="w-5 h-5 mr-2" /> Update Name
@@ -289,7 +269,6 @@ export default function Profile() {
                         </button>
                     </div>
                 </div>
-
 
                 <div className="bg-white rounded-lg shadow p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
